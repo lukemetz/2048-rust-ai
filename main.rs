@@ -4,7 +4,7 @@ use std::iter::FromIterator;
 use std::fmt;
 use rand::{Rng, random};
 
-
+#[deriving(Eq, Show)]
 enum Action {
   Up,
   Down,
@@ -104,7 +104,7 @@ fn get_first_free(start_cord: Cord, action : Action, board : &Board) -> Cord {
 }
 
 
-#[deriving(Clone)]
+#[deriving(Clone, Eq)]
 struct Board {
   vec : Vec<int>
 }
@@ -191,7 +191,17 @@ impl Board {
     }
     accum
   }
+
+  pub fn get_actions(&self) -> Vec<Action> {
+    let start = vec!(Up, Down, Left, Right);
+    let filtered = start.move_iter().filter(|&action| {
+      let trial = self.move(action);
+      trial != *self
+    });
+    FromIterator::from_iter(filtered)
+  }
 }
+
 
 impl fmt::Show for Board {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -256,6 +266,23 @@ mod test {
     *board.vec.get_mut(6) = 2;
     println!("{}", board);
     assert_eq!(get_first_free(Cord(2,1), Up, &board), Cord(2,1));
+  }
+
+  #[test]
+  fn test_Board_get_actions() {
+    let mut board = Board::empty();
+    *board.get_mut(Cord(1,0)) = 2;
+    *board.get_mut(Cord(1,1)) = 4;
+    *board.get_mut(Cord(1,2)) = 8;
+    *board.get_mut(Cord(1,3)) = 16;
+    let actions = board.get_actions();
+    assert_eq!(actions, vec!(Left, Right));
+    *board.get_mut(Cord(0,0)) = 3;
+    *board.get_mut(Cord(0,1)) = 5;
+    *board.get_mut(Cord(0,2)) = 9;
+    *board.get_mut(Cord(0,3)) = 17;
+    let actions = board.get_actions();
+    assert_eq!(actions, vec!(Right));
   }
 
   mod move {
