@@ -17,8 +17,8 @@ impl Action {
     match *self {
       Down=> (0, 1),
       Up=> (0, -1),
-      Right=> (-1, 0),
-      Left=> (1, 0)
+      Right=> (1, 0),
+      Left=> (-1, 0)
     }
   }
 
@@ -90,7 +90,6 @@ fn get_traversal(action : Action) -> Vec<Cord> {
 
 fn get_first_free(start_cord: Cord, action : Action, board : &Board) -> Cord {
   let (dx, dy) = action.dir();
-  let Cord(x,y) = start_cord;
   let mut on_cord = action.min_cord(start_cord);
   let mut ret = start_cord;
   while on_cord != start_cord {
@@ -133,6 +132,7 @@ impl Board {
 
   pub fn move(&self, action : Action) -> Board {
     let mut new = Board::empty();
+    let mut merged = Board::empty();
     for &cord in get_traversal(action).iter() {
       match self.get(cord) {
         0 => (),
@@ -144,9 +144,9 @@ impl Board {
               *new.get_mut(first_free) = value;
             },
             Some(over) => {
-              //And hasn't merged
-              if new.get(over) == value {
+              if new.get(over) == value && merged.get(over) == 0 {
                 *new.get_mut(over) = value*2;
+                *merged.get_mut(over) = 1;
               } else {
                 *new.get_mut(first_free) = value;
               }
@@ -170,8 +170,11 @@ impl Board {
   }
 
   pub fn get(&self, c : Cord) -> int {
-    let Cord(x, y) = c;
-    *self.vec.get((x as uint) + (y*4) as uint)
+    if c.is_valid() {
+      let Cord(x, y) = c; *self.vec.get((x as uint) + (y*4) as uint)
+    } else {
+      fail!("cord invalid {}", c);
+    }
   }
 
   pub fn get_mut<'a>(&'a mut self, c : Cord) -> &'a mut int {
@@ -202,9 +205,27 @@ impl fmt::Show for Board {
   }
 }
 
-struct GameState {
-  board : Board
+pub fn main() {
+  let mut board = Board::new();
+  for line in std::io::stdin().lines() {
+    let string = match line {
+      Ok(s) => s,
+      _ => "nothing".to_owned()
+    };
+    if string == "a\n".to_owned() {
+      board = board.move(Left);
+    } else if string == "d\n".to_owned() {
+      board = board.move(Right);
+    } else if string == "w\n".to_owned() {
+      board = board.move(Up);
+    } else if string == "s\n".to_owned() {
+      board = board.move(Down);
+    }
+    board = board.add_random();
+    println!("{}", board);
+  }
 }
+
 #[cfg(test)]
 mod test {
   use super::{Board, Action, Left, Right, Up, Down, Cord, get_first_free};
@@ -275,8 +296,38 @@ mod test {
                       0, 0, 0, 0,
                       0, 0, 0, 0);
       assert_eq!(board_up.vec, up);
+    }
 
+    #[test]
+    pub fn test_simple_merge_crash1() {
+      let mut board = Board::empty();
+      //*board.get_mut(Cord(0,0)) = 2;
+      *board.get_mut(Cord(3,3)) = 2;
+      *board.get_mut(Cord(0,3)) = 2;
+      println!("{}", board);
+      let board_new = board.move(Left);
+      println!("{}", board_new);
+      let new = vec!(0, 0, 0, 0,
+                     0, 0, 0, 0,
+                     0, 0, 0, 0,
+                     4, 0, 0, 0);
+      assert_eq!(board_new.vec, new);
+    }
 
+    #[test]
+    pub fn test_multi_merge() {
+      let mut board = Board::empty();
+      *board.get_mut(Cord(1,1)) = 2;
+      *board.get_mut(Cord(1,2)) = 2;
+      *board.get_mut(Cord(1,3)) = 4;
+      println!("{}", board);
+      let board_up = board.move(Up);
+      println!("{}", board_up);
+      let up = vec!(0, 4, 0, 0,
+                      0, 4, 0, 0,
+                      0, 0, 0, 0,
+                      0, 0, 0, 0);
+      assert_eq!(board_up.vec, up);
     }
   }
 }
