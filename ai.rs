@@ -8,7 +8,7 @@ pub trait AIPlayer {
   fn next_action(&self, board : &Board) -> Action;
 }
 
-#[deriving(Show)]
+#[deriving(Show, Clone, Send)]
 pub struct RandomPlayer;
 impl AIPlayer for RandomPlayer {
   fn next_action(&self, board : &Board) -> Action {
@@ -24,19 +24,33 @@ pub struct Player<T> {
   pub summaries : Vec<Summary>
 }
 
-impl<T : AIPlayer> Player<T> {
+impl<T : AIPlayer + Clone + Send> Player<T> {
   pub fn new(player : T) -> Player<T> {
     Player { player : player , summaries : vec!()}
   }
+
+  pub fn play_one(player : T) -> Summary {
+    let mut board = Board::new();
+    while board.get_actions().len() > 0 {
+      let action = player.next_action(&board);
+      board = board.move(action).add_random();
+    }
+    board.summary()
+  }
+
   pub fn play(&mut self, n : uint) {
     let start = time::get_time();
+    let (tx, rx) : (Sender<_>, Receiver<_>) = channel();
     for _ in range(0, n) {
-      let mut board = Board::new();
-      while board.get_actions().len() > 0 {
-        let action = self.player.next_action(&board);
-        board = board.move(action).add_random();
-      }
-      self.summaries.push(board.summary());
+      let player = self.player.clone();
+      let tx = tx.clone();
+      spawn(proc() {
+        let summary = Player::play_one(player.clone());
+        tx.send(summary);
+      });
+    }
+    for _ in range(0, n) {
+      self.summaries.push(rx.recv());
     }
     let end = time::get_time();
     let mut delta_s = (end.sec-start.sec) as f32;
