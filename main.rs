@@ -22,11 +22,6 @@ impl Action {
     }
   }
 
-  pub fn neg_dir(&self) -> (int, int) {
-    let (x,y) = self.dir();
-    (-x, -y)
-  }
-
   pub fn min_cord(&self, start : Cord) -> Cord {
     let Cord(x, y) = start;
     match *self {
