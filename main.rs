@@ -53,6 +53,16 @@ impl Cord {
     }
   }
 
+  pub fn over(&self, action : Action) -> Option<Cord> {
+    let (dx, dy) = action.dir();
+    let Cord(x,y) = *self;
+    let over = Cord(x+dx, y+dy);
+    if over.is_valid() {
+      Some(over)
+    } else {
+      None
+    }
+  }
 }
 
 //TODO compute this once
@@ -127,8 +137,21 @@ impl Board {
       match self.get(cord) {
         0 => (),
         value => {
-          let best_free = get_first_free(cord, action, &new);
-          *new.get_mut(best_free) = value;
+          let first_free = get_first_free(cord, action, &new);
+          let next_cord = first_free.over(action);
+          match next_cord {
+            None => {
+              *new.get_mut(first_free) = value;
+            },
+            Some(over) => {
+              //And hasn't merged
+              if new.get(over) == value {
+                *new.get_mut(over) = value*2;
+              } else {
+                *new.get_mut(first_free) = value;
+              }
+            }
+          }
         }
       }
     }
@@ -215,7 +238,7 @@ mod test {
   }
 
   mod move {
-    use super::super::{Board, Action, Left, Right, Up, Down};
+    use super::super::{Board, Action, Left, Right, Up, Down, Cord};
     #[test]
     pub fn test_simple_move() {
       let mut board = Board::empty();
@@ -237,6 +260,23 @@ mod test {
                       0, 0, 0, 0,
                       0, 2, 4, 0);
       assert_eq!(board_down.vec, down);
+    }
+
+    #[test]
+    pub fn test_simple_merge() {
+      let mut board = Board::empty();
+      *board.get_mut(Cord(1,1)) = 2;
+      *board.get_mut(Cord(1,2)) = 2;
+      println!("{}", board);
+      let board_up = board.move(Up);
+      println!("{}", board_up);
+      let up = vec!(0, 4, 0, 0,
+                      0, 0, 0, 0,
+                      0, 0, 0, 0,
+                      0, 0, 0, 0);
+      assert_eq!(board_up.vec, up);
+
+
     }
   }
 }
