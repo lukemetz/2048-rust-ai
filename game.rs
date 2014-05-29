@@ -241,7 +241,7 @@ pub struct Summary {
 
 #[cfg(test)]
 mod test {
-  use super::{Board, Action, Left, Right, Up, Down, Cord, get_first_free};
+  use super::{Board, Left, Right, Up, Down, Cord, get_first_free};
   #[test]
   fn test_Board_get_empty() {
     let mut board = Board::empty();
@@ -289,7 +289,7 @@ mod test {
   }
 
   mod move {
-    use super::super::{Board, Action, Left, Right, Up, Down, Cord};
+    use super::super::{Board, Left, Up, Down, Cord};
     #[test]
     pub fn test_simple_move() {
       let mut board = Board::empty();

@@ -3,8 +3,8 @@ extern crate time;
 
 use std::num::Float;
 
-use game::{Action, Board, Summary, Up, Cord};
-use rand::{Rng, random, task_rng};
+use game::{Action, Board, Summary, Cord};
+use rand::{Rng, task_rng};
 use std::iter::FromIterator;
 use std::iter::AdditiveIterator;
 
@@ -91,25 +91,13 @@ pub struct ExpectiMax {
 
 impl AIPlayer for ExpectiMax {
   fn next_action(&self, board : &Board) -> Action {
-    //println!("STARTED DOING THE TREE");
     let cur_state = State::new(Start, 0, board.clone());
-    let (s, score) = self.max_layer(&cur_state);
-    self.trace(&cur_state, score);
-    //println!("DONE! got state {}", s);
+    let (s, _) = self.max_layer(&cur_state);
     s.action.dir()
   }
 }
 
 impl ExpectiMax {
-  fn trace(&self, state : &State, score : f32) {
-    /*
-    for k in range(0, state.depth) {
-      print!("    ");
-    }
-    println!("Score {}, State {}", score, state);
-    */
-  }
-
   pub fn new(max_depth : uint, num_expecti : uint) -> ExpectiMax {
     ExpectiMax { max_depth : max_depth , num_expecti : num_expecti}
   }
@@ -122,12 +110,12 @@ impl ExpectiMax {
     } else {
       let actions = actions_vec.iter();
 
-      let mut states : Vec<State> = FromIterator::from_iter(
+      let states : Vec<State> = FromIterator::from_iter(
         actions.map(|&action| {
           State::new(Direction(action), s.depth + 1, s.board.move(action))
         }));
 
-      let mut results = states.iter().map(|next_state| {
+      let results = states.iter().map(|next_state| {
         self.expecti_layer(next_state)
       });
 
@@ -136,7 +124,6 @@ impl ExpectiMax {
       let mut max_idx : Option<uint> = None;
 
       for (idx, score) in results.enumerate() {
-        self.trace(states.get(idx), score);
         if score > max_score {
           max_score = score;
           max_idx = Some(idx);
@@ -179,7 +166,7 @@ impl ExpectiMax {
       let actions = if num_empty <= (self.num_expecti-1) as f32 {
         action_2.chain(empty.map(|a| a))
       } else {
-        action_2.chain(a.map(|(indx, val, prob)| (indx, 4, 0.1 / num_empty)))
+        action_2.chain(a.map(|(indx, _, _)| (indx, 4, 0.1 / num_empty)))
       };
 
       let num_actions = (num_empty * 2.) as uint;
@@ -191,12 +178,12 @@ impl ExpectiMax {
         task_rng().sample(actions, num_actions)
       };
 
-      let mut states : Vec<State> = FromIterator::from_iter(
+      let states : Vec<State> = FromIterator::from_iter(
         sampled_actions.iter().map(|&action| {
           State::new(Space(action), s.depth + 1, s.board.add_space(action))
         }));
 
-      let mut results = states.iter().map(|next_state| {
+      let results = states.iter().map(|next_state| {
         self.max_layer(next_state)
       });
 
@@ -280,16 +267,14 @@ impl ExpectiMax {
 
 #[test]
 pub fn test_ExpectiMax_simple() {
+  //check that there are no runtime exceptions
   let mut board = Board::empty();
   board.vec  = vec!(0, 2, 4, 2,
                     0, 2, 0, 2,
                     0, 4, 4, 2,
                     0, 4, 2, 2);
-  let e = ExpectiMax::new(3);
-  let action = e.next_action(&board);
-
-  println!("{}", action);
-  assert_eq!(0, 1);
+  let e = ExpectiMax::new(3, 5);
+  let _ = e.next_action(&board);
 }
 
 

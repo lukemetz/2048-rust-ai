@@ -1,7 +1,7 @@
 extern crate rand;
 
-use game::{Board, Action, Left, Right, Up, Down};
-use ai::{AIPlayer, Player, RandomPlayer, ExpectiMax};
+use game::{Board, Left, Right, Up, Down};
+use ai::{Player, ExpectiMax};
 
 pub mod game;
 pub mod ai;
