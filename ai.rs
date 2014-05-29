@@ -4,7 +4,7 @@ extern crate time;
 use std::num::Float;
 
 use game::{Action, Board, Summary, Up};
-use rand::{Rng, random};
+use rand::{Rng, random, task_rng};
 use std::iter::FromIterator;
 
 pub trait AIPlayer {
@@ -152,8 +152,15 @@ impl ExpectiMax {
       });
       let actions = action_2.chain(a.map(|(indx, val, prob)| (indx, 4, 0.1 / num_empty)));
 
+      let num_actions = (num_empty * 2.) as uint;
+      let sampled_actions = if num_actions > 5 {
+        task_rng().sample(actions, 5)
+      } else {
+        task_rng().sample(actions, num_actions)
+      };
+
       let mut states : Vec<State> = FromIterator::from_iter(
-        actions.map(|action| {
+        sampled_actions.iter().map(|&action| {
           State::new(Space(action), s.depth + 1, s.board.add_space(action))
         }));
 
@@ -163,12 +170,14 @@ impl ExpectiMax {
 
 
       let mut cum_score = 0.;
+      let mut cum_prob = 0.;
       for (idx, (_, score)) in results.enumerate() {
         let state = states.get(idx);
         let (_, _, prob) = state.action.space();
         cum_score += score * prob;
+        cum_prob += prob;
       }
-      cum_score
+      cum_score / cum_prob
     }
   }
 

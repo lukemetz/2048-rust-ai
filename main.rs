@@ -33,9 +33,9 @@ pub fn main() {
   let expecti = ExpectiMax::new(5);
   let mut player = Player::new(expecti);
 
-  Player::play_interactive(expecti);
-  //player.play(3);
-  //let max = player.reports.iter().max_by(|report| report.summary.best_tile);
-  //println!("max: {}", max);
+  //Player::play_interactive(expecti);
+  player.play(14);
+  let max = player.reports.iter().max_by(|report| report.summary.best_tile);
+  println!("max: {}", max);
 
 }
