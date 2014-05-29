@@ -21,3 +21,10 @@ Scores from 100 Samples not in center * 3
 4096: 0.07
 8192: 0
 
+
+Scores from 100 Samples * 2
+==========
+1024: 0.95
+2048: 0.59
+4096: 0.07
+8192: 0
