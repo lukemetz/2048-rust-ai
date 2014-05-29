@@ -3,7 +3,7 @@ use std::iter::FromIterator;
 use std::fmt;
 use rand::{Rng, random};
 
-#[deriving(Eq, Show)]
+#[deriving(Eq, Show, Clone)]
 pub enum Action {
   Up,
   Down,
@@ -99,7 +99,7 @@ fn get_first_free(start_cord: Cord, action : Action, board : &Board) -> Cord {
 
 #[deriving(Clone, Eq)]
 pub struct Board {
-  vec : Vec<int>
+  pub vec : Vec<int>
 }
 
 impl Board {
@@ -122,6 +122,15 @@ impl Board {
         }
       })
      )
+  }
+
+  //pub fn get_random_action(&self) -> &Iterator
+
+  pub fn add_space(&self, action : (uint, int, f32)) -> Board {
+    let mut new = self.clone();
+    let (indx, val, _) = action;
+    *new.vec.get_mut(indx) = val;
+    new
   }
 
   pub fn move(&self, action : Action) -> Board {
@@ -214,6 +223,7 @@ impl Board {
 
 impl fmt::Show for Board {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    let _ = write!(f, "\n");
     for y in range(0, 4) {
       for x in range(0, 4) {
         let _ = write!(f, "{:5} ", self.get(Cord(x, y)));

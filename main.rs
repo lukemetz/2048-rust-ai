@@ -1,7 +1,7 @@
 extern crate rand;
 
 use game::{Board, Action, Left, Right, Up, Down};
-use ai::{AIPlayer, Player, RandomPlayer};
+use ai::{AIPlayer, Player, RandomPlayer, ExpectiMax};
 
 pub mod game;
 pub mod ai;
@@ -28,10 +28,14 @@ pub fn repl() {
 }
 
 pub fn main() {
-  let random = RandomPlayer;
-  let mut player = Player::new(random);
-  player.play(10000);
-  let max = player.summaries.iter().max_by(|summary| summary.best_tile);
-  println!("max: {}", max);
+  //let random = RandomPlayer;
+  //let mut player = Player::new(random);
+  let expecti = ExpectiMax::new(5);
+  let mut player = Player::new(expecti);
+
+  Player::play_interactive(expecti);
+  //player.play(3);
+  //let max = player.reports.iter().max_by(|report| report.summary.best_tile);
+  //println!("max: {}", max);
 
 }
