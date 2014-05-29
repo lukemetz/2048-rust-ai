@@ -271,7 +271,7 @@ impl ExpectiMax {
       empty_count : empty_count*2.,
       near_game_over : near_game_over,
       squared_log : squared_log,
-      best_not_in_center : best_not_in_center,
+      best_not_in_center : best_not_in_center * 3.,
       smooth_rating : smooth_rating
     };
     score

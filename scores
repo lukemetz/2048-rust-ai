@@ -1,0 +1,23 @@
+before big loss
+Scores from 100 Samples
+==========
+1024: 0.93
+2048: 0.6
+4096: 0.14
+8192: 0
+
+
+Post with scores
+1024: 0.94
+2048: 0.59
+4096: 0.11
+8192: 0.01
+
+
+Scores from 100 Samples not in center * 3
+==========
+1024: 0.94
+2048: 0.63
+4096: 0.07
+8192: 0
+
