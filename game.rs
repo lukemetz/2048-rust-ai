@@ -33,7 +33,7 @@ impl Action {
 }
 
 #[deriving(Eq, Show)]
-pub struct Cord(int, int);
+pub struct Cord(pub int, pub int);
 
 impl Cord {
   pub fn is_valid(&self) -> bool {

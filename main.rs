@@ -30,12 +30,12 @@ pub fn repl() {
 pub fn main() {
   //let random = RandomPlayer;
   //let mut player = Player::new(random);
-  let expecti = ExpectiMax::new(5);
+  //let expecti = ExpectiMax::new(6);
+  let expecti = ExpectiMax::new(5, 5);
   let mut player = Player::new(expecti);
 
   //Player::play_interactive(expecti);
-  player.play(14);
-  let max = player.reports.iter().max_by(|report| report.summary.best_tile);
-  println!("max: {}", max);
+  player.play(100);
+  player.print_reports();
 
 }
