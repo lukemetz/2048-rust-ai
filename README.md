@@ -1,4 +1,4 @@
-2048-rust-ai
+2048 AI in Rust
 ============
 
 A toy implementation of 2048 as well as a modified expectimax implementation to play it.
